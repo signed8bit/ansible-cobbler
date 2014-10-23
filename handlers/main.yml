@@ -1,0 +1,24 @@
+---
+# Handlers for cobbler notifications
+
+- name: restart xinetd
+  service: name=xinetd state=restarted
+
+- name: restart firewalld
+  service: name=firewalld state=restarted
+
+- name: refresh cobbler
+  debug: msg=restarting and syncing cobbler
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+- name: restart cobbler
+  service: name=cobbler state=restarted
+
+- name: wait for cobbler
+  wait_for: host=127.0.0.1 port=25151 delay=5 timeout=30 state=started
+
+- name: sync cobbler
+  command: cobbler sync

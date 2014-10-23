@@ -1,0 +1,166 @@
+---
+# file: main.yml
+# The tasks for the Cobbler role
+
+# -------------
+# Prerequisites
+# -------------
+
+- name: unsupported package manager
+  fail: msg='this playbook requries yum or apt only'
+  when: ansible_pkg_mgr != 'yum' and ansible_pkg_mgr != 'apt'
+
+# ---------------
+# Package Sources
+# ---------------
+
+# yum
+- name: configure epel repo (yum)
+  template: src=epel.repo.j2
+        dest=/etc/yum.repos.d/epel.repo
+        owner=root group=root mode=0644
+  when: ansible_pkg_mgr == 'yum'
+
+# ------------
+# Dependencies
+# ------------
+
+# yum
+- name: install dependencies (yum)
+  yum: name={{ item }} state=present
+  with_items:
+    - xinetd
+    - dhcp
+  when: ansible_pkg_mgr == 'yum'
+
+# apt
+- name: install dependencies (apt)
+  apt: name={{ item }} state=present update_cache=true
+  with_items:
+    - xinetd
+    - isc-dhcp-server
+    - debmirror
+  when: ansible_pkg_mgr == 'apt'
+
+# -------
+# selinux
+# -------
+- name: set selinux to permissive (yum)
+  selinux: policy=targeted state=permissive
+  when: ansible_pkg_mgr == 'yum'
+
+# -----
+# dhcpd
+# -----
+- name: configure dhcpd (yum)
+  template: src=dhcpd.j2 dest=/etc/sysconfig/dhcpd
+  when: ansible_pkg_mgr == 'yum'
+
+- name: enable dhcpd (yum)
+  service: name=dhcpd state=stopped enabled=true
+  when: ansible_pkg_mgr == 'yum'
+
+# ---------------
+# isc-dhcp-server
+# ---------------
+- name: configure isc-dhcp-server (apt)
+  template: src=isc-dhcp-server.j2 dest=/etc/default/isc-dhcp-server
+  when: ansible_pkg_mgr == 'apt'
+
+- name: enable isc-dhcp-server (apt)
+  service: name=isc-dhcp-server state=stopped enabled=true
+  when: ansible_pkg_mgr == 'apt'
+
+# ---------
+# firewalld
+# ---------
+- name: check if firewalld is installed
+  sudo: yes
+  command: which firewalld
+  register: firewalld
+  changed_when: false
+  ignore_errors: true
+
+- name: check if firewalld service is running
+  sudo: yes
+  command: firewall-cmd --state
+  register: firewalld_svc
+  ignore_errors: true
+  when: firewalld|success
+
+- name: enable cobbler tftpd through firewalld
+  sudo: yes
+  firewalld: service=tftp permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+- name: enable cobbler httpd through firewalld
+  sudo: yes
+  firewalld: service=http permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+# ---
+# ufw
+# ---
+- name: check if ufw is installed
+  sudo: yes
+  command: which ufw
+  register: ufw
+  changed_when: false
+  ignore_errors: true
+
+- name: allow tftp through ufw
+  sudo: yes
+  ufw: rule=allow port=69 proto=tcp
+  when: ufw|success
+
+- name: allow http through ufw
+  sudo: yes
+  ufw: rule=allow port=80 proto=tcp
+  when: ufw|success
+
+# -------
+# Cobbler
+# -------
+
+- name: install cobbler (yum)
+  yum: name=cobbler state=present
+  when: ansible_pkg_mgr == 'yum'
+
+- name: install cobbler (apt)
+  apt: name=cobbler state=present
+  when: ansible_pkg_mgr == 'apt'
+
+- name: start and enable apache2
+  service: name=apache2 state=started enabled=true
+
+- name: configure xinetd rsync
+  copy: src=rsync
+        dest=/etc/xinetd.d/
+        owner=root group=root mode=0644
+  notify: restart xinetd
+
+- name: start and enable xinetd
+  service: name=xinetd state=started enabled=true
+
+- name: configure cobbler
+  template: src=settings.j2 dest=/etc/cobbler/settings
+  notify: refresh cobbler
+
+- name: start and enable cobbler
+  service: name=cobbler state=started enabled=true
+
+- name: get cobbler loaders
+  command: cobbler get-loaders
+  args:
+    creates: /var/lib/cobbler/loaders/README
+  notify: refresh cobbler
+
+- name: update cobbler signatures
+  command: cobbler signature update
+  notify: refresh cobbler
+
+- name: configure cobbler dhcp
+  template: src=dhcp.template.j2 dest=/etc/cobbler/dhcp.template
+  notify: refresh cobbler

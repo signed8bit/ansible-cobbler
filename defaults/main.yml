@@ -1,0 +1,20 @@
+---
+# Default values suitable for a Vagrant environment
+
+# settings
+# WARNING: The default password is "changeme" fine for demo purposes
+# but should be set to something more secure.
+cobbler_default_password_crypted: $1$0j9R7J3U$qhH8N9oXlytT.pEjjSud60
+bound_interface: eth0
+
+# dhcpd
+cobbler_dhcp_listen_interfaces: eth0
+
+# dhcp.template
+cobbler_dhcp_subnet: 192.168.10.0
+cobbler_dhcp_netmask: 255.255.255.0
+cobbler_dhcp_option_routers: 192.168.10.1
+cobbler_dhcp_option_domain_name_servers: 192.168.10.1
+cobbler_dhcp_option_subnet_mask: 255.255.255.0
+cobbler_dhcp_dynamic_bootp_start: 192.168.10.100
+cobbler_dhcp_dynamic_bootp_end: 192.168.10.254
