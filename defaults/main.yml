@@ -5,10 +5,10 @@
 # WARNING: The default password is "changeme" fine for demo purposes
 # but should be set to something more secure.
 cobbler_default_password_crypted: $1$0j9R7J3U$qhH8N9oXlytT.pEjjSud60
-bound_interface: eth0
+bound_interface: eth1
 
 # dhcpd
-cobbler_dhcp_listen_interfaces: eth0
+cobbler_dhcp_listen_interfaces: eth1
 
 # dhcp.template
 cobbler_dhcp_subnet: 192.168.10.0
@@ -18,3 +18,42 @@ cobbler_dhcp_option_domain_name_servers: 192.168.10.1
 cobbler_dhcp_option_subnet_mask: 255.255.255.0
 cobbler_dhcp_dynamic_bootp_start: 192.168.10.100
 cobbler_dhcp_dynamic_bootp_end: 192.168.10.254
+
+# cobbler distros
+distros:
+  - {
+      name: RHEL-Server-7.0,
+      arch: x86_64,
+      file: /root/iso/rhel-server-7.0-x86_64-dvd.iso,
+      path: /root/iso/rhel-server-7.0/,
+      kickstart: /var/lib/cobbler/kickstarts/rhel-server-7.0.ks
+    }
+
+# cobbler systems
+
+# This playbook assumes you've run vagrant up within the ansible-cobbler playbook
+servers:
+- {
+    name: cobbler-node1,
+    hostname: cobbler-node1.local,
+    profile: RHEL-Server-7.0-x86_64,
+    interface: eth1,
+    ip: 192.168.233.101,
+    netmask: 255.255.255.0,
+    gateway: 192.168.233.1,
+    mac: '08:00:27:02:74:D2',
+    dhcptag: 192.168.233.0,
+    next_server: 192.168.233.20
+  }
+- {
+    name: cobbler-node2,
+    hostname: cobbler-node2.local,
+    profile: RHEL-Server-7.0-x86_64,
+    interface: eth2,
+    ip: 192.168.234.101,
+    netmask: 255.255.255.0,
+    gateway: 192.168.234.1,
+    mac: '08:00:27:A6:40:61',
+    dhcptag: 192.168.234.0,
+    next_server: 192.168.234.20
+   }
