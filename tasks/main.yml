@@ -21,12 +21,6 @@
         owner=root group=root mode=0644
   when: ansible_pkg_mgr == 'yum'
 
-#  - name: configure cobbler yum repo
-#    template: src=cobbler.repo.j2
-#          dest=/etc/yum.repos.d/cobbler.repo
-#          owner=root group=root mode=0644
-#    when: ansible_pkg_mgr == 'yum'
-
 # ------------
 # Dependencies
 # ------------
@@ -151,7 +145,10 @@
 
 - name: configure cobbler
   template: src=settings.j2 dest=/etc/cobbler/settings
-  notify: refresh cobbler
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 
 - name: start and enable cobbler
   service: name=cobbler state=started enabled=true
@@ -160,48 +157,83 @@
   command: cobbler get-loaders
   args:
     creates: /var/lib/cobbler/loaders/README
-  notify: refresh cobbler
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 
 - name: update cobbler signatures
   command: cobbler signature update
-  notify: refresh cobbler
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 
 - name: configure cobbler dhcp
   template: src=dhcp.template.j2 dest=/etc/cobbler/dhcp.template
-  notify: refresh cobbler
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 
 # ---------------------
 # Cobbler Distributions
 # ---------------------
 
 # Attempt to un-mount any previous disto mount points, can occur if previous run failed
-#- name: umount isos
-#  shell: umount {{ item.path| quote }}
-#  with_items: distros
-#  ignore_errors: yes
-#
-#- name: create iso directory to hold distro images
-#  file: path=/root/iso owner=root group=root state=directory
-#
-#- name: copy RedHat distro install media
-#  copy: src=iso/rhel-server-7.0-x86_64-dvd.iso
-#        dest=/root/iso/rhel-server-7.0-x86_64-dvd.iso
-#        owner=root group=root mode=0644
+- name: umount isos
+  shell: umount {{ item.path | quote }}
+  with_items: distros
+  when: distros is defined
+  ignore_errors: yes
+
+- name: create iso directory to hold distro images
+  file: path=~/iso state=directory
+
+# Download each defined distro ISO if it doesn't already exist
+- name: download distro iso files
+  get_url: url={{ item.url }} dest={{ item.file }}
+  with_items: distros
+  when: distros is defined
 
 # Add the each distro/profile pair only if the distro doesn't already exist
-#- name: add distro/profile pairs to cobbler
-#  shell: >
-#    cobbler distro report --name="{{ item.name }}-{{ item.arch }}"
-#    || (mkdir -p {{ item.path| quote }}
-#    && mount -t iso9660 -o loop,ro {{ item.file| quote }} {{ item.path| quote }}
-#    && cobbler import --path={{ item.path| quote }} --name={{ item.name| quote }} --arch={{ item.arch| quote }} --kickstart={{ item.kickstart| quote }}
-#    && umount {{ item.path| quote }})
-#  with_items: distros
-#  notify: refresh cobbler
+- name: add distro/profile pairs to cobbler
+  shell: >
+    cobbler distro report --name="{{ item.name }}-{{ item.arch }}"
+    || (mkdir -p {{ item.path | quote }}
+    && mount -t iso9660 -o loop,ro {{ item.file | quote }} {{ item.path | quote }}
+    && cobbler import --path={{ item.path | quote }} --name={{ item.name | quote }} --arch={{ item.arch | quote }} {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
+    && umount {{ item.path | quote }})
+  with_items: distros
+  when: distros is defined
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 
 # ---------------
 # Cobbler Systems
 # ---------------
 
-
+- name: add systems to cobbler
+  shell: >
+    cobbler system add
+      --clobber
+      --name={{ item.name | quote }}
+      --hostname={{ item.hostname | quote }}
+      --profile={{ item.profile | quote }}
+      --ip-address={{ item.ip | quote }}
+      --gateway={{ item.gateway | quote }}
+      --netmask={{ item.netmask | quote }}
+      --mac={{ item.mac | quote }}
+      --interface={{ item.interface | quote }}
+      --netboot-enabled=true
+      {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
+      {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}
+  with_items: systems
+  when: systems is defined
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
 

@@ -22,38 +22,36 @@ cobbler_dhcp_dynamic_bootp_end: 192.168.10.254
 # cobbler distros
 distros:
   - {
-      name: RHEL-Server-7.0,
+      name: ubuntu-14.04-mini,
       arch: x86_64,
-      file: /root/iso/rhel-server-7.0-x86_64-dvd.iso,
-      path: /root/iso/rhel-server-7.0/,
-      kickstart: /var/lib/cobbler/kickstarts/rhel-server-7.0.ks
+      url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
+      file: /root/iso/ubuntu-14.04-mini.iso,
+      path: /root/iso/ubuntu-14.04-mini/
     }
 
 # cobbler systems
-
-# This playbook assumes you've run vagrant up within the ansible-cobbler playbook
-servers:
-- {
-    name: cobbler-node1,
-    hostname: cobbler-node1.local,
-    profile: RHEL-Server-7.0-x86_64,
-    interface: eth1,
-    ip: 192.168.233.101,
-    netmask: 255.255.255.0,
-    gateway: 192.168.233.1,
-    mac: '08:00:27:02:74:D2',
-    dhcptag: 192.168.233.0,
-    next_server: 192.168.233.20
-  }
-- {
-    name: cobbler-node2,
-    hostname: cobbler-node2.local,
-    profile: RHEL-Server-7.0-x86_64,
-    interface: eth2,
-    ip: 192.168.234.101,
-    netmask: 255.255.255.0,
-    gateway: 192.168.234.1,
-    mac: '08:00:27:A6:40:61',
-    dhcptag: 192.168.234.0,
-    next_server: 192.168.234.20
-   }
+systems:
+  - {
+      name: cobbler-node1,
+      hostname: cobbler-node1.local,
+      profile: ubuntu-14.04-mini-x86_64,
+      interface: eth0,
+      ip: 192.168.10.100,
+      netmask: 255.255.255.0,
+      gateway: 192.168.10.1,
+      mac: '08:00:27:C4:E8:D6',
+#      dhcptag: 192.168.10.0,
+#      next_server: 192.168.10.11
+    }
+  - {
+      name: cobbler-node2,
+      hostname: cobbler-node2.local,
+      profile: ubuntu-14.04-mini-x86_64,
+      interface: eth0,
+      ip: 192.168.10.101,
+      netmask: 255.255.255.0,
+      gateway: 192.168.10.1,
+      mac: '08:00:27:30:1F:90',
+#      dhcptag: 192.168.10.0,
+#      next_server: 192.168.10.11
+    }
