@@ -21,11 +21,12 @@ set vendorclass = option vendor-class-identifier;
 
 option pxe-system-type code 93 = unsigned integer 16;
 
-subnet {{ cobbler_dhcp_subnet }} netmask {{ cobbler_dhcp_netmask }} {
-    option routers             {{ cobbler_dhcp_option_routers }};
-    option domain-name-servers {{ cobbler_dhcp_option_domain_name_servers }};
-    option subnet-mask         {{ cobbler_dhcp_option_subnet_mask }};
-    range dynamic-bootp        {{ cobbler_dhcp_dynamic_bootp_start }} {{ cobbler_dhcp_dynamic_bootp_end }};
+{% for item in subnets %}
+subnet {{ item.cobbler_dhcp_subnet }} netmask {{ item.cobbler_dhcp_netmask }} {
+    option routers             {{ item.cobbler_dhcp_option_routers }};
+    option domain-name-servers {{ item.cobbler_dhcp_option_domain_name_servers }};
+    option subnet-mask         {{ item.cobbler_dhcp_option_subnet_mask }};
+    range dynamic-bootp        {{ item.cobbler_dhcp_dynamic_bootp_start }} {{ item.cobbler_dhcp_dynamic_bootp_end }};
     default-lease-time         21600;
     max-lease-time             43200;
     next-server                $next_server;
@@ -43,6 +44,7 @@ subnet {{ cobbler_dhcp_subnet }} netmask {{ cobbler_dhcp_netmask }} {
     }
 
 }
+{% endfor %}
 
 #for dhcp_tag in $dhcp_tags.keys():
     ## group could be subnet if your dhcp tags line up with your subnets
@@ -86,4 +88,3 @@ group {
         #end for
 }
 #end for
-

@@ -11,47 +11,103 @@ bound_interface: eth1
 cobbler_dhcp_listen_interfaces: eth1
 
 # dhcp.template
-cobbler_dhcp_subnet: 192.168.10.0
-cobbler_dhcp_netmask: 255.255.255.0
-cobbler_dhcp_option_routers: 192.168.10.1
-cobbler_dhcp_option_domain_name_servers: 192.168.10.1
-cobbler_dhcp_option_subnet_mask: 255.255.255.0
-cobbler_dhcp_dynamic_bootp_start: 192.168.10.100
-cobbler_dhcp_dynamic_bootp_end: 192.168.10.254
-
-# cobbler distros
-distros:
+# Change the following lines according your network subnets.
+subnets:
   - {
-      name: ubuntu-14.04-mini,
-      arch: x86_64,
-      url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
-      file: /root/iso/ubuntu-14.04-mini.iso,
-      path: /root/iso/ubuntu-14.04-mini/
+      cobbler_dhcp_subnet: 192.168.10.0,
+      cobbler_dhcp_netmask: 255.255.255.0,
+      cobbler_dhcp_option_routers: 192.168.10.1,
+      cobbler_dhcp_option_domain_name_servers: 192.168.10.1,
+      cobbler_dhcp_option_subnet_mask: 255.255.255.0,
+      cobbler_dhcp_dynamic_bootp_start: 192.168.10.100,
+      cobbler_dhcp_dynamic_bootp_end: 192.168.10.254,
     }
+  - {
+      cobbler_dhcp_subnet: 10.10.10.0,
+      cobbler_dhcp_netmask: 255.255.255.0,
+      cobbler_dhcp_option_routers: 10.10.10.1,
+      cobbler_dhcp_option_domain_name_servers: 10.10.10.1,
+      cobbler_dhcp_option_subnet_mask: 255.255.255.0,
+      cobbler_dhcp_dynamic_bootp_start: 10.10.10.100,
+      cobbler_dhcp_dynamic_bootp_end: 10.10.10.254,
+    }
+
+# cobbler distros iso
+# Uncomment (and change) the following lines if you wish to use an iso-file as a distro.
+# distros:
+#   - {
+#       name: ubuntu-14.04-mini,
+#       arch: x86_64,
+#       url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
+#       file: /root/iso/ubuntu-14.04-mini.iso,
+#       path: /root/iso/ubuntu-14.04-mini/
+#     }
+
+# cobbler distro imports
+# Uncomment (and change) the following lines if you wish to import a distro.
+# distro_imports:
+#   - {
+#       name: centos-6.6,
+#       arch: x86_64,
+#       url: 'rsync://mirrors.nl.kernel.org::centos/6.6/os/x86_64/'',
+#     }
+#   - {
+#       name: centos-7.0.1406,
+#       arch: x86_64,
+#       url: 'rsync://mirrors.nl.kernel.org::centos/6.6/os/x86_64/',
+#     }
+
+# cobbler repos
+# Uncomment (and change) the following lines if you wish to add a repo.
+# repos:
+#   - {
+#       name: centos-updates-6.6-x86_64,
+#       arch: x86_64,
+#       mirror: 'http://mirrors.nl.kernel.org/centos/6.6/updates/x86_64/',
+#       mirror_locally: Y,
+#     }
+#   - {
+#       name: epel-6-x86_64,
+#       arch: x86_64,
+#       mirror: 'http://mirrors.nl.kernel.org/fedora-epel/6/x86_64/',
+#       mirror_locally: Y,
+#     }
+
+# cobbler profiles
+# Uncomment (and change) the following lines if you wish to add a profile.
+# profiles:
+#   - {
+#       name: centos-6.6-x86_64,
+#       distro: centos-6.6-x86_64,
+#       kickstart: /var/lib/cobbler/kickstarts/sample_end.ks,
+#       ksmeta: 'ksvariable=hello',
+#       repos: 'centos-updates-6.6-x86_64 epel-6-x86_64',
+#     }
 
 # cobbler systems
-systems:
-  - {
-      name: cobbler-node1,
-      hostname: cobbler-node1.local,
-      profile: ubuntu-14.04-mini-x86_64,
-      interface: eth0,
-      ip: 192.168.10.100,
-      netmask: 255.255.255.0,
-      gateway: 192.168.10.1,
-      mac: '08:00:27:C4:E8:D6',
-#      dhcptag: 192.168.10.0,
-#      next_server: 192.168.10.11
-    }
-  - {
-      name: cobbler-node2,
-      hostname: cobbler-node2.local,
-      profile: ubuntu-14.04-mini-x86_64,
-      interface: eth0,
-      ip: 192.168.10.101,
-      netmask: 255.255.255.0,
-      gateway: 192.168.10.1,
-      mac: '08:00:27:30:1F:90',
-#      dhcptag: 192.168.10.0,
-#      next_server: 192.168.10.11
-    }
+# Uncomment (and change) the following lines if you wish to add a system.
+# systems:
+#   - {
+#       name: cobbler-node1,
+#       hostname: cobbler-node1.local,
+#       profile: ubuntu-14.04-mini-x86_64,
+#       interface: eth0,
+#       ip: 192.168.10.100,
+#       netmask: 255.255.255.0,
+#       gateway: 192.168.10.1,
+#       mac: '08:00:27:C4:E8:D6',
+# #      dhcptag: 192.168.10.0,
+# #      next_server: 192.168.10.11
+#     }
+#   - {
+#       name: cobbler-node2,
+#       hostname: cobbler-node2.local,
+#       profile: centos-7.0.1406-x86_64,
+#       interface: eth0,
+#       ip: 10.10.10.101,
+#       netmask: 255.255.255.0,
+#       gateway: 10.10.10.1,
+#       mac: '08:00:27:30:1F:90',
+# #      dhcptag: 192.168.10.0,
+# #      next_server: 192.168.10.11
+#     }

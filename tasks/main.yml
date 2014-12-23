@@ -228,6 +228,61 @@
     - wait for cobbler
     - sync cobbler
 
+- name: check distro exists in cobbler
+  with_items: distro_imports
+  command: cobbler distro report --name="{{ item.name }}-{{ item.arch }}"
+  register: distro_result
+  ignore_errors: true
+  when: distro_imports is defined
+
+- name: import distro to cobbler
+  shell: cobbler import --name="{{ item.name }}-{{ item.arch }}" --path="{{ item.url }}" --arch="{{ item.arch }}"
+  with_items: distro_imports
+  when: distro_imports is defined and distro_result|failed
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+# ---------------
+# Cobbler Repos
+# ---------------
+
+- name: add repos to cobbler
+  shell: >
+    cobbler repo add
+    --clobber
+    --name={{ item.name | quote }}
+    --mirror={{ item.mirror | quote }}
+    {% if item.arch is defined %}--arch={{ item.arch | quote }}{% endif %}
+    {% if item.mirror_locally is defined %}--mirror-locally={{ item.mirror_locally | quote }}{% endif %}
+  with_items: repos
+  when: repos is defined
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+# ---------------
+# Cobbler Profiles
+# ---------------
+
+- name: add profiles to cobbler
+  shell: >
+    cobbler profile add
+    --clobber
+    --name={{ item.name | quote }}
+    --distro={{ item.distro | quote }}
+    {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
+    {% if item.ksmeta is defined %}--ksmeta={{ item.ksmeta | quote }}{% endif %}
+    {% if item.repos is defined %}--repos={{ item.repos | quote }}{% endif %}
+  with_items: profiles
+  when: profiles is defined
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
 # ---------------
 # Cobbler Systems
 # ---------------
@@ -235,22 +290,21 @@
 - name: add systems to cobbler
   shell: >
     cobbler system add
-      --clobber
-      --name={{ item.name | quote }}
-      --hostname={{ item.hostname | quote }}
-      --profile={{ item.profile | quote }}
-      --ip-address={{ item.ip | quote }}
-      --gateway={{ item.gateway | quote }}
-      --netmask={{ item.netmask | quote }}
-      --mac={{ item.mac | quote }}
-      --interface={{ item.interface | quote }}
-      --netboot-enabled=true
-      {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
-      {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}
+    --clobber
+    --name={{ item.name | quote }}
+    --hostname={{ item.hostname | quote }}
+    --profile={{ item.profile | quote }}
+    --ip-address={{ item.ip | quote }}
+    --gateway={{ item.gateway | quote }}
+    --mac={{ item.mac | quote }}
+    --interface={{ item.interface | quote }}
+    --netboot-enabled=true
+    {% if item.static is defined %}--static={{ item.static | quote }}{% endif %}
+    {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
+    {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}
   with_items: systems
   when: systems is defined
   notify:
     - restart cobbler
     - wait for cobbler
     - sync cobbler
-
