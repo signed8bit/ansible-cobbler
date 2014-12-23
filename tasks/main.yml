@@ -173,6 +173,7 @@
   args:
     creates: /var/lib/cobbler/loaders/README
   ignore_errors: yes
+  when: not skipping_signature_update
   notify:
     - restart cobbler
     - wait for cobbler
@@ -181,6 +182,7 @@
 - name: update cobbler signatures
   command: cobbler signature update
   ignore_errors: yes
+  when: not skipping_signature_update
   notify:
     - restart cobbler
     - wait for cobbler

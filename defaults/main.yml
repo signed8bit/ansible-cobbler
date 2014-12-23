@@ -32,6 +32,9 @@ subnets:
       cobbler_dhcp_dynamic_bootp_end: 10.10.10.254,
     }
 
+skipping_get_loaders: false
+skipping_signature_update: false
+
 # cobbler distros iso
 # Uncomment (and change) the following lines if you wish to use an iso-file as a distro.
 # distros:
