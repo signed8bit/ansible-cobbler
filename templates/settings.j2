@@ -79,7 +79,7 @@ cheetah_import_whitelist:
 createrepo_flags: "-c cache -s sha"
 
 # if no kickstart is specified to profile add, use this template
-default_kickstart: /var/lib/cobbler/kickstarts/default.ks
+default_kickstart: /var/lib/cobbler/kickstarts/ubuntu-server.preseed
 
 # configure all installed systems to use these nameservers by default
 # unless defined differently in the profile.  For DHCP configurations
@@ -118,7 +118,7 @@ default_template_type: "cheetah"
 # "virbr0".  This can be overriden on a per-profile
 # basis or at the koan command line though this saves
 # typing to just set it here to the most common option.
-default_virt_bridge: xenbr0
+default_virt_bridge: virbr0
 
 # use this as the default disk size for virt guests (GB)
 default_virt_file_size: 5
@@ -130,7 +130,7 @@ default_virt_ram: 512
 # is set on the profile/system, what virtualization type
 # should be assumed?  Values: xenpv, xenfv, qemu, vmware
 # (NOTE: this does not change what virt_type is chosen by import)
-default_virt_type: xenpv
+default_virt_type: qemu
 
 # enable gPXE booting? Enabling this option will cause cobbler
 # to copy the undionly.kpxe file to the tftp root directory,
@@ -170,6 +170,8 @@ kernel_options:
  ksdevice: bootif
  lang: ' '
  text: ~
+ locale: en_US
+ priority: critical
 
 # s390 systems require additional kernel options in addition to the
 # above defaults
@@ -384,7 +386,6 @@ scm_track_mode: "git"
 # if you have a server that appears differently to different subnets
 # (dual homed, etc), you need to read the --server-override section
 # of the manpage for how that works.
-# TODO: Dynamically set based on a selected interface e.g. ansible_inface.ipv4.address
 server: {{ hostvars[inventory_hostname]['ansible_' + bound_interface]['ipv4']['address'] }}
 
 # If set to 1, all commands will be forced to use the localhost address

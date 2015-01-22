@@ -15,15 +15,11 @@
 # ---------------
 
 # yum
-- name: check epel repo (yum)
-  stat: path=/etc/yum.repos.d/epel.repo
-  register: epel_file
-
 - name: configure epel repo (yum)
   template: src=epel.repo.j2
         dest=/etc/yum.repos.d/epel.repo
         owner=root group=root mode=0644
-  when: ansible_pkg_mgr == 'yum' and not epel_file.stat.exists
+  when: ansible_pkg_mgr == 'yum'
 
 # ------------
 # Dependencies
@@ -35,7 +31,6 @@
   with_items:
     - xinetd
     - dhcp
-    - syslinux
   when: ansible_pkg_mgr == 'yum'
 
 # apt
@@ -136,13 +131,8 @@
   apt: name=cobbler state=present
   when: ansible_pkg_mgr == 'apt'
 
-- name: start and enable apache2 (apt)
+- name: start and enable apache2
   service: name=apache2 state=started enabled=true
-  when: ansible_pkg_mgr == 'apt'
-
-- name: start and enable httpd (yum)
-  service: name=httpd state=started enabled=true
-  when: ansible_pkg_mgr == 'yum'
 
 - name: configure xinetd rsync
   copy: src=rsync
@@ -160,20 +150,14 @@
     - wait for cobbler
     - sync cobbler
 
-- name: start and enable cobbler (apt)
+- name: start and enable cobbler
   service: name=cobbler state=started enabled=true
-  when: ansible_pkg_mgr == 'apt'
-
-- name: start and enable cobblerd (yum)
-  service: name=cobblerd state=started enabled=true
-  when: ansible_pkg_mgr == 'yum'
 
 - name: get cobbler loaders
   command: cobbler get-loaders
   args:
     creates: /var/lib/cobbler/loaders/README
-  ignore_errors: yes
-  when: not skipping_signature_update
+  when: cobbler_get_loaders
   notify:
     - restart cobbler
     - wait for cobbler
@@ -181,8 +165,7 @@
 
 - name: update cobbler signatures
   command: cobbler signature update
-  ignore_errors: yes
-  when: not skipping_signature_update
+  when: cobbler_signature_update
   notify:
     - restart cobbler
     - wait for cobbler
@@ -194,6 +177,9 @@
     - restart cobbler
     - wait for cobbler
     - sync cobbler
+
+- name: adding defualt ubuntu preseed
+  template: src=ubuntu-server.preseed.j2 dest=/etc/cobbler/ubuntu-server.preseed
 
 # ---------------------
 # Cobbler Distributions

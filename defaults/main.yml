@@ -7,44 +7,37 @@
 cobbler_default_password_crypted: $1$0j9R7J3U$qhH8N9oXlytT.pEjjSud60
 bound_interface: eth1
 
+cobbler_get_loaders: true
+cobbler_signature_update: true
+
 # dhcpd
 cobbler_dhcp_listen_interfaces: eth1
 
 # dhcp.template
-# Change the following lines according your network subnets.
 subnets:
   - {
       cobbler_dhcp_subnet: 192.168.10.0,
       cobbler_dhcp_netmask: 255.255.255.0,
-      cobbler_dhcp_option_routers: 192.168.10.1,
-      cobbler_dhcp_option_domain_name_servers: 192.168.10.1,
+      cobbler_dhcp_option_routers: 192.168.10.2,
+      cobbler_dhcp_option_domain_name_servers: 192.168.10.2,
       cobbler_dhcp_option_subnet_mask: 255.255.255.0,
       cobbler_dhcp_dynamic_bootp_start: 192.168.10.100,
       cobbler_dhcp_dynamic_bootp_end: 192.168.10.254,
     }
-  - {
-      cobbler_dhcp_subnet: 10.10.10.0,
-      cobbler_dhcp_netmask: 255.255.255.0,
-      cobbler_dhcp_option_routers: 10.10.10.1,
-      cobbler_dhcp_option_domain_name_servers: 10.10.10.1,
-      cobbler_dhcp_option_subnet_mask: 255.255.255.0,
-      cobbler_dhcp_dynamic_bootp_start: 10.10.10.100,
-      cobbler_dhcp_dynamic_bootp_end: 10.10.10.254,
-    }
 
-skipping_get_loaders: false
-skipping_signature_update: false
+# ubuntu preseed
+ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler distros iso
-# Uncomment (and change) the following lines if you wish to use an iso-file as a distro.
-# distros:
-#   - {
-#       name: ubuntu-14.04-mini,
-#       arch: x86_64,
-#       url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
-#       file: /root/iso/ubuntu-14.04-mini.iso,
-#       path: /root/iso/ubuntu-14.04-mini/
-#     }
+distros:
+  - {
+      name: ubuntu-14.04-mini,
+      arch: x86_64,
+      url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
+      file: /root/iso/ubuntu-14.04-mini.iso,
+      path: /root/iso/ubuntu-14.04-mini/,
+      kickstart: /var/lib/cobbler/kickstarts/ubuntu-server.preseed
+    }
 
 # cobbler distro imports
 # Uncomment (and change) the following lines if you wish to import a distro.
@@ -88,29 +81,16 @@ skipping_signature_update: false
 #     }
 
 # cobbler systems
-# Uncomment (and change) the following lines if you wish to add a system.
-# systems:
-#   - {
-#       name: cobbler-node1,
-#       hostname: cobbler-node1.local,
-#       profile: ubuntu-14.04-mini-x86_64,
-#       interface: eth0,
-#       ip: 192.168.10.100,
-#       netmask: 255.255.255.0,
-#       gateway: 192.168.10.1,
-#       mac: '08:00:27:C4:E8:D6',
-# #      dhcptag: 192.168.10.0,
-# #      next_server: 192.168.10.11
-#     }
-#   - {
-#       name: cobbler-node2,
-#       hostname: cobbler-node2.local,
-#       profile: centos-7.0.1406-x86_64,
-#       interface: eth0,
-#       ip: 10.10.10.101,
-#       netmask: 255.255.255.0,
-#       gateway: 10.10.10.1,
-#       mac: '08:00:27:30:1F:90',
-# #      dhcptag: 192.168.10.0,
-# #      next_server: 192.168.10.11
-#     }
+systems:
+   - {
+       name: cobbler-node1,
+       hostname: cobbler-node1.local,
+       profile: ubuntu-14.04-mini-x86_64,
+       interface: eth0,
+       ip: 192.168.10.100,
+       netmask: 255.255.255.0,
+       gateway: 192.168.10.2,
+       mac: '00:50:56:25:2B:19'
+#      dhcptag: 192.168.10.0,
+#      next_server: 192.168.10.11
+     }

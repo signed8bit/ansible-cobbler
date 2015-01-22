@@ -3,11 +3,11 @@
 # VM config file for the Vagrant development environment
 
 hosts:
-    cobbler-centos:
-      private_ip: 192.168.10.10
-      memory: 512
-      box: chef/centos-7.0
-      extra_vars: { bound_interface: 'enp0s8', cobbler_dhcp_listen_interfaces: 'enp0s8' }
+#    cobbler-centos:
+#      private_ip: 192.168.10.10
+#      memory: 512
+#      box: chef/centos-7.0
+#      extra_vars: { bound_interface: 'enp0s8', cobbler_dhcp_listen_interfaces: 'enp0s8' }
 
     cobbler-ubuntu:
       private_ip: 192.168.10.11
