@@ -4,13 +4,13 @@
 
 hosts:
 #    cobbler-centos:
-#      private_ip: 192.168.10.10
+#      private_ip: 10.0.2.10
 #      memory: 512
 #      box: chef/centos-7.0
 #      extra_vars: { bound_interface: 'enp0s8', cobbler_dhcp_listen_interfaces: 'enp0s8' }
 
     cobbler-ubuntu:
-      private_ip: 192.168.10.11
+      private_ip: 10.0.2.11
       memory: 512
       box: chef/ubuntu-14.04
       extra_vars: { bound_interface: 'eth1', cobbler_dhcp_listen_interfaces: 'eth1' }

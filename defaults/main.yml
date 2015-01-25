@@ -16,13 +16,13 @@ cobbler_dhcp_listen_interfaces: eth1
 # dhcp.template
 subnets:
   - {
-      cobbler_dhcp_subnet: 192.168.10.0,
+      cobbler_dhcp_subnet: 10.0.2.0,
       cobbler_dhcp_netmask: 255.255.255.0,
-      cobbler_dhcp_option_routers: 192.168.10.2,
-      cobbler_dhcp_option_domain_name_servers: 192.168.10.2,
+      cobbler_dhcp_option_routers: 10.0.2.2,
+      cobbler_dhcp_option_domain_name_servers: 10.0.2.2,
       cobbler_dhcp_option_subnet_mask: 255.255.255.0,
-      cobbler_dhcp_dynamic_bootp_start: 192.168.10.100,
-      cobbler_dhcp_dynamic_bootp_end: 192.168.10.254,
+      cobbler_dhcp_dynamic_bootp_start: 10.0.2.100,
+      cobbler_dhcp_dynamic_bootp_end: 10.0.2.254,
     }
 
 # ubuntu preseed
@@ -87,9 +87,9 @@ systems:
        hostname: cobbler-node1.local,
        profile: ubuntu-14.04-mini-x86_64,
        interface: eth0,
-       ip: 192.168.10.100,
+       ip: 10.0.2.100,
        netmask: 255.255.255.0,
-       gateway: 192.168.10.2,
+       gateway: 10.0.2.2,
        mac: '00:50:56:25:2B:19'
 #      dhcptag: 192.168.10.0,
 #      next_server: 192.168.10.11
