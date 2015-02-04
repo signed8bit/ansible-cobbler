@@ -202,31 +202,37 @@
   when: distros is defined
 
 # Add the each distro/profile pair only if the distro doesn't already exist
+- name: check distro exists in cobbler
+  with_items: distros
+  command: cobbler distro report --name="{{ item.name }}"
+  register: distro_result
+  ignore_errors: true
+  when: distros is defined
+
 - name: add distro/profile pairs to cobbler
   shell: >
-    cobbler distro report --name="{{ item.name }}-{{ item.arch }}"
-    || (mkdir -p {{ item.path | quote }}
+    (mkdir -p {{ item.path | quote }}
     && mount -t iso9660 -o loop,ro {{ item.file | quote }} {{ item.path | quote }}
     && cobbler import --path={{ item.path | quote }} --name={{ item.name | quote }} --arch={{ item.arch | quote }} {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     && umount {{ item.path | quote }})
   with_items: distros
-  when: distros is defined
+  when: distros is defined and distro_result|failed
   notify:
     - restart cobbler
     - wait for cobbler
     - sync cobbler
 
-- name: check distro exists in cobbler
+- name: check distro for import exists in cobbler
   with_items: distro_imports
-  command: cobbler distro report --name="{{ item.name }}-{{ item.arch }}"
-  register: distro_result
+  command: cobbler distro report --name="{{ item.name }}"
+  register: distro_imports_result
   ignore_errors: true
   when: distro_imports is defined
 
 - name: import distro to cobbler
   shell: cobbler import --name="{{ item.name }}-{{ item.arch }}" --path="{{ item.url }}" --arch="{{ item.arch }}"
   with_items: distro_imports
-  when: distro_imports is defined and distro_result|failed
+  when: distro_imports is defined and distro_imports_result|failed
   notify:
     - restart cobbler
     - wait for cobbler
