@@ -292,7 +292,7 @@
     --gateway={{ item.gateway | quote }}
     --mac={{ item.mac | quote }}
     --interface={{ item.interface | quote }}
-    --netboot-enabled=true
+    --netboot-enabled={{ item.netboot | quote }}
     {% if item.static is defined %}--static={{ item.static | quote }}{% endif %}
     {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
     {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}

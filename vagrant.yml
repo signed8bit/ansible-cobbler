@@ -10,7 +10,7 @@ hosts:
 #      extra_vars: { bound_interface: 'enp0s8', cobbler_dhcp_listen_interfaces: 'enp0s8' }
 
     cobbler-ubuntu:
-      private_ip: 10.0.3.11
+      private_ip: 10.0.4.110
       memory: 512
       box: chef/ubuntu-14.04
       extra_vars: { bound_interface: 'eth1', cobbler_dhcp_listen_interfaces: 'eth1' }

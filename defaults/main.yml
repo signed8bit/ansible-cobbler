@@ -90,7 +90,8 @@ systems:
        ip: 10.0.2.100,
        netmask: 255.255.255.0,
        gateway: 10.0.2.2,
-       mac: '00:50:56:25:2B:19'
+       mac: '00:50:56:25:2B:19',
+       netboot: 'false'
 #      dhcptag: 192.168.10.0,
 #      next_server: 192.168.10.11
      }
