@@ -10,6 +10,18 @@
   fail: msg='this playbook requries yum or apt only'
   when: ansible_pkg_mgr != 'yum' and ansible_pkg_mgr != 'apt'
 
+# -------------
+# facts
+# -------------
+
+- set_fact:
+    daemon: cobbler
+  when: ansible_pkg_mgr == 'apt'
+
+- set_fact:
+    daemon: cobblerd
+  when: ansible_pkg_mgr == 'yum'
+
 # ---------------
 # Package Sources
 # ---------------
@@ -131,8 +143,19 @@
   apt: name=cobbler state=present
   when: ansible_pkg_mgr == 'apt'
 
+- stat: path=/etc/apache2
+  register: apache2_path
+
 - name: start and enable apache2
   service: name=apache2 state=started enabled=true
+  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
+
+- stat: path=/etc/httpd
+  register: httpd_path
+
+- name: start and enable httpd
+  service: name=httpd state=started enabled=true
+  when: httpd_path.stat.isdir is defined and httpd_path.stat.isdir
 
 - name: configure xinetd rsync
   copy: src=rsync
@@ -151,7 +174,10 @@
     - sync cobbler
 
 - name: start and enable cobbler
-  service: name=cobbler state=started enabled=true
+  service: name={{daemon}} state=started enabled=true
+
+- name: wait for cobbler
+  wait_for: host=127.0.0.1 port=25151 delay=5 timeout=30 state=started
 
 - name: get cobbler loaders
   command: cobbler get-loaders
