@@ -8,7 +8,7 @@
   service: name=firewalld state=restarted
 
 - name: restart cobbler
-  service: name=cobbler state=restarted
+  service: name={{daemon}} state=restarted
 
 - name: wait for cobbler
   wait_for: host=127.0.0.1 port=25151 delay=5 timeout=30 state=started
