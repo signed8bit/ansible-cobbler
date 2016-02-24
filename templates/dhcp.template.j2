@@ -18,6 +18,8 @@ allow bootp;
 
 ignore client-updates;
 set vendorclass = option vendor-class-identifier;
+default-lease-time 7200;
+max-lease-time 7200;
 
 option pxe-system-type code 93 = unsigned integer 16;
 
