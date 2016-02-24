@@ -24,20 +24,27 @@ subnets:
       cobbler_dhcp_dynamic_bootp_start: 10.0.2.100,
       cobbler_dhcp_dynamic_bootp_end: 10.0.2.254,
     }
+# ubuntu repo
+cobbler_manage_repo: true
+cobbler_ubuntu_release: 14.04
+cobbler_ubuntu_repo_url: "http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_{{ cobbler_ubuntu_release }}/"
+
+# cobbler version
+cobbler_version: "2.6.11-1"
 
 # ubuntu preseed
 ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler distros iso
-distros:
-  - {
-      name: ubuntu-14.04-mini,
-      arch: x86_64,
-      url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
-      file: /root/iso/ubuntu-14.04-mini.iso,
-      path: /root/iso/ubuntu-14.04-mini/,
-      kickstart: /var/lib/cobbler/kickstarts/ubuntu-server.preseed
-    }
+#distros:
+#  - {
+#      name: ubuntu-14.04-mini,
+#      arch: x86_64,
+#      url: 'http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/mini.iso',
+#      file: /root/iso/ubuntu-14.04-mini.iso,
+#      path: /root/iso/ubuntu-14.04-mini/,
+#      kickstart: /var/lib/cobbler/kickstarts/ubuntu-server.preseed
+#    }
 
 # cobbler distro imports
 # Uncomment (and change) the following lines if you wish to import a distro.
@@ -81,17 +88,17 @@ distros:
 #     }
 
 # cobbler systems
-systems:
-   - {
-       name: cobbler-node1,
-       hostname: cobbler-node1.local,
-       profile: ubuntu-14.04-mini-x86_64,
-       interface: eth0,
-       ip: 10.0.2.100,
-       netmask: 255.255.255.0,
-       gateway: 10.0.2.2,
-       mac: '00:50:56:25:2B:19',
-       netboot: 'false'
+#systems:
+#   - {
+#       name: cobbler-node1,
+#       hostname: cobbler-node1.local,
+#       profile: ubuntu-14.04-mini-x86_64,
+#       interface: eth0,
+#       ip: 10.0.2.100,
+#       netmask: 255.255.255.0,
+#       gateway: 10.0.2.2,
+#       mac: '00:50:56:25:2B:19',
+#       netboot: 'false'
 #      dhcptag: 192.168.10.0,
 #      next_server: 192.168.10.11
-     }
+#     }

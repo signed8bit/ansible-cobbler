@@ -30,7 +30,7 @@ subnet {{ item.cobbler_dhcp_subnet }} netmask {{ item.cobbler_dhcp_netmask }} {
     default-lease-time         21600;
     max-lease-time             43200;
     next-server                $next_server;
-    deny                       unknown-clients;
+#    deny                       unknown-clients;
     class "pxeclients" {
         match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
         if option pxe-system-type = 00:02 {
