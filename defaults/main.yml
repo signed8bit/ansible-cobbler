@@ -9,7 +9,7 @@ bound_interface: eth1
 
 cobbler_get_loaders: true
 cobbler_signature_update: true
-
+cobbler_proxy_url_ext: 
 # dhcpd
 cobbler_dhcp_listen_interfaces: eth1
 
