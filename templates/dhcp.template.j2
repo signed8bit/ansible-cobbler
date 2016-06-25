@@ -22,6 +22,7 @@ default-lease-time 7200;
 max-lease-time 7200;
 
 option pxe-system-type code 93 = unsigned integer 16;
+option classless-routes code 121 = array of unsigned integer 8;
 
 {% for item in subnets %}
 subnet {{ item.cobbler_dhcp_subnet }} netmask {{ item.cobbler_dhcp_netmask }} {
@@ -32,6 +33,11 @@ subnet {{ item.cobbler_dhcp_subnet }} netmask {{ item.cobbler_dhcp_netmask }} {
     default-lease-time         21600;
     max-lease-time             43200;
     next-server                $next_server;
+    {% if item.cobbler_dhcp_static_routes is defined %}
+    # defines the type of data used to send the routing informations
+    option classless-routes {% for static_route in item.cobbler_dhcp_static_routes %} {{ static_route }} {% if loop.last %};{% else %},
+                            {% endif %}{% endfor %}
+    {% endif %}
 #    deny                       unknown-clients;
     class "pxeclients" {
         match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
