@@ -78,6 +78,11 @@ group {
         #if $iface.gateway:
         option routers $iface.gateway;
         #end if
+        {% if item.cobbler_dhcp_static_routes is defined %}
+        # defines the type of data used to send the routing informations
+        option classless-routes {% for static_route in item.cobbler_dhcp_static_routes %} {{ static_route }} {% if loop.last %};{% else %},
+                                {% endif %}{% endfor %}
+        {% endif %}
         #if $iface.enable_gpxe:
         if exists user-class and option user-class = "gPXE" {
             filename "http://$cobbler_server/cblr/svc/op/gpxe/system/$iface.owner";
