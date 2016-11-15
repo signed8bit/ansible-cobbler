@@ -60,9 +60,9 @@
     - xinetd
     - isc-dhcp-server
     - debmirror
-    - libapache2-mod-python 
-    - libapache2-mod-proxy-uwsgi 
-    - fence-agents 
+    - libapache2-mod-python
+    - libapache2-mod-proxy-uwsgi
+    - fence-agents
     - tftpd-hpa
   when: ansible_pkg_mgr == 'apt'
 
@@ -169,7 +169,7 @@
         dest="/etc/apache2/conf-enabled/cobbler_web.conf"
         mode=0644
   notify:
-  - restart apache
+    - restart apache
   when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
 
 - name: enable module proxy
@@ -186,7 +186,7 @@
 
 - stat: path=/etc/httpd
   register: httpd_path
-      
+
 - name: start and enable httpd
   service: name=httpd state=started enabled=true
   when: httpd_path.stat.isdir is defined and httpd_path.stat.isdir
@@ -248,7 +248,8 @@
 # Attempt to un-mount any previous disto mount points, can occur if previous run failed
 - name: umount isos
   shell: umount {{ item.path | quote }}
-  with_items: distros
+  with_items:
+    - "{{ distros }}"
   when: distros is defined
   ignore_errors: yes
 
@@ -258,17 +259,19 @@
 # Download each defined distro ISO if it doesn't already exist
 - name: download distro iso files
   get_url: url={{ item.url }} dest={{ item.file }}
-  with_items: distros
-  when: distros is defined 
+  with_items:
+    - "{{ distros }}"
+  when: distros is defined
 
 # Add the each distro/profile pair only if the distro doesn't already exist
 - name: check distro exists in cobbler
-  with_items: distros
   shell: "cobbler distro report --name={{ item.name | quote }}-{{ item.arch | quote }} > /dev/null"
+  ignore_errors: yes
+  changed_when: no
   register: distro_result
-  ignore_errors: true
-  changed_when: False
   when: distros is defined
+  with_items:
+    - "{{ ditros }}"
 
 - debug: msg="Distro watch {{ distro_result }}"
 
@@ -278,7 +281,8 @@
     && mount -t iso9660 -o loop,ro {{ item.file | quote }} {{ item.path | quote }}
     && cobbler import --path={{ item.path | quote }} --name={{ item.name | quote }} --arch={{ item.arch | quote }} {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     && umount {{ item.path | quote }})
-  with_items: distros
+  with_items:
+    - "{{ ditros }}"
   when: distros is defined and distro_result|failed
   notify:
     - restart cobbler
@@ -313,7 +317,8 @@
     --mirror={{ item.mirror | quote }}
     {% if item.arch is defined %}--arch={{ item.arch | quote }}{% endif %}
     {% if item.mirror_locally is defined %}--mirror-locally={{ item.mirror_locally | quote }}{% endif %}
-  with_items: repos
+  with_items:
+    - "{{ repos }}"
   when: repos is defined
   notify:
     - restart cobbler
@@ -333,7 +338,8 @@
     {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     {% if item.ksmeta is defined %}--ksmeta={{ item.ksmeta | quote }}{% endif %}
     {% if item.repos is defined %}--repos={{ item.repos | quote }}{% endif %}
-  with_items: profiles
+  with_items:
+    - "{{ profiles }}"
   when: profiles is defined
   notify:
     - restart cobbler
@@ -359,7 +365,8 @@
     {% if item.static is defined %}--static={{ item.static | quote }}{% endif %}
     {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
     {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}
-  with_items: systems
+  with_items:
+    - "{{ systems }}"
   when: systems is defined
   notify:
     - restart cobbler
