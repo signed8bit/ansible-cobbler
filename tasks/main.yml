@@ -271,7 +271,7 @@
   register: distro_result
   when: distros is defined
   with_items:
-    - "{{ ditros }}"
+    - "{{ distros }}"
 
 - debug: msg="Distro watch {{ distro_result }}"
 
