@@ -9,7 +9,7 @@ bound_interface: eth1
 
 cobbler_get_loaders: true
 cobbler_signature_update: true
-cobbler_proxy_url_ext: 
+cobbler_proxy_url_ext:
 # dhcpd
 cobbler_dhcp_listen_interfaces: eth1
 
@@ -36,7 +36,7 @@ cobbler_version: "2.6.11-1"
 ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler distros iso
-#distros:
+distros: []
 #  - {
 #      name: ubuntu-14.04-mini,
 #      arch: x86_64,
@@ -48,7 +48,7 @@ ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler distro imports
 # Uncomment (and change) the following lines if you wish to import a distro.
-# distro_imports:
+distro_imports: []
 #   - {
 #       name: centos-6.6,
 #       arch: x86_64,
@@ -62,7 +62,7 @@ ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler repos
 # Uncomment (and change) the following lines if you wish to add a repo.
-# repos:
+repos: []
 #   - {
 #       name: centos-updates-6.6-x86_64,
 #       arch: x86_64,
@@ -78,7 +78,7 @@ ubuntu_mirror: us.archive.ubuntu.com
 
 # cobbler profiles
 # Uncomment (and change) the following lines if you wish to add a profile.
-# profiles:
+profiles: []
 #   - {
 #       name: centos-6.6-x86_64,
 #       distro: centos-6.6-x86_64,
@@ -88,7 +88,7 @@ ubuntu_mirror: us.archive.ubuntu.com
 #     }
 
 # cobbler systems
-#systems:
+systems: []
 #   - {
 #       name: cobbler-node1,
 #       hostname: cobbler-node1.local,

@@ -282,7 +282,7 @@
     && cobbler import --path={{ item.path | quote }} --name={{ item.name | quote }} --arch={{ item.arch | quote }} {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     && umount {{ item.path | quote }})
   with_items:
-    - "{{ ditros }}"
+    - "{{ distros }}"
   when: distros is defined and distro_result|failed
   notify:
     - restart cobbler
@@ -317,9 +317,9 @@
     --mirror={{ item.mirror | quote }}
     {% if item.arch is defined %}--arch={{ item.arch | quote }}{% endif %}
     {% if item.mirror_locally is defined %}--mirror-locally={{ item.mirror_locally | quote }}{% endif %}
+  when: repos is defined
   with_items:
     - "{{ repos }}"
-  when: repos is defined
   notify:
     - restart cobbler
     - wait for cobbler
@@ -338,9 +338,9 @@
     {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     {% if item.ksmeta is defined %}--ksmeta={{ item.ksmeta | quote }}{% endif %}
     {% if item.repos is defined %}--repos={{ item.repos | quote }}{% endif %}
+  when: profiles is defined
   with_items:
     - "{{ profiles }}"
-  when: profiles is defined
   notify:
     - restart cobbler
     - wait for cobbler
@@ -365,9 +365,9 @@
     {% if item.static is defined %}--static={{ item.static | quote }}{% endif %}
     {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
     {% if item.next_server is defined %}--server {{ item.next_server | quote }}{% endif %}
+  when: systems is defined
   with_items:
     - "{{ systems }}"
-  when: systems is defined
   notify:
     - restart cobbler
     - wait for cobbler
