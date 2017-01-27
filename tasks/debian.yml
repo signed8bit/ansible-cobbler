@@ -1,0 +1,45 @@
+---
+
+# -------------
+# facts
+# -------------
+
+- set_fact:
+    daemon: cobblerd
+
+# ---------------
+# Package Sources
+# ---------------
+
+- name: import cobbler key
+  apt_key:  url="{{ cobbler_ubuntu_repo_url }}/Release.key" state=present
+  when: cobbler_manage_repo
+
+- name: import cobbler repo
+  apt_repository: repo='deb {{ cobbler_ubuntu_repo_url }}/ ./' state=present
+  when: cobbler_manage_repo
+
+
+# ------------
+# Dependencies
+# ------------
+
+- name: install dependencies (apt)
+  apt: name={{ item }} state=present update_cache=true
+  with_items:
+    - xinetd
+    - isc-dhcp-server
+    - debmirror
+    - libapache2-mod-python
+    - libapache2-mod-proxy-uwsgi
+    - fence-agents
+    - tftpd-hpa
+
+# ---------------
+# isc-dhcp-server
+# ---------------
+- name: configure isc-dhcp-server (apt)
+  template: src=isc-dhcp-server.j2 dest=/etc/default/isc-dhcp-server
+
+- name: enable isc-dhcp-server (apt)
+  service: name=isc-dhcp-server state=stopped enabled=true
