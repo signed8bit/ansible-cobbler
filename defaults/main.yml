@@ -26,14 +26,21 @@ subnets:
     }
 # ubuntu repo
 cobbler_manage_repo: true
-cobbler_ubuntu_release: 16.04
-cobbler_ubuntu_repo_url: "http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler28/xUbuntu_{{ cobbler_ubuntu_release }}/"
+cobbler_ubuntu_release: 14.04
+cobbler_ubuntu_dependiences_fix: http://launchpadlibrarian.net/109052632/python-support_1.0.15_all.deb
+cobbler_ubuntu_repo_url: "http://download.opensuse.org/repositories/home:/libertas-ict:/cobbler26/xUbuntu_{{ cobbler_ubuntu_release }}/"
 
 # cobbler version
-cobbler_version: "2.8.0-1"
+cobbler_version: "2.6.11-1"
 
 # ubuntu preseed
 ubuntu_mirror: archive.ubuntu.com
+
+kickstarts: []
+#  - {
+#    src: ../../files/cobbler/ubuntu-server.seed,
+#    dest: /var/lib/cobbler/kickstarts/ubuntu-server.preseed
+#    }
 
 # cobbler distros iso
 distros: []

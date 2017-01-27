@@ -1,12 +1,4 @@
 ---
-
-# -------------
-# facts
-# -------------
-
-- set_fact:
-    daemon: cobblerd
-
 # ---------------
 # Package Sources
 # ---------------
@@ -19,13 +11,19 @@
   apt_repository: repo='deb {{ cobbler_ubuntu_repo_url }}/ ./' state=present
   when: cobbler_manage_repo
 
-
 # ------------
 # Dependencies
 # ------------
+#
+# HACK: Cobbler ubuntu deb package is still asking for python-support dependency
+#       which is no longer provided in ubuntu 16.04 as they moved away
+#       from python2.7 to python3
+- name: Fix missing package for cobbler version => 2.8
+  apt: deb="{{ cobbler_ubuntu_dependiences_fix }}" state=present
+  when: ansible_lsb.major_release >= 16
 
 - name: install dependencies (apt)
-  apt: name={{ item }} state=present update_cache=true
+  apt: name="{{ item }}" state=present update_cache=true
   with_items:
     - xinetd
     - isc-dhcp-server

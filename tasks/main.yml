@@ -7,59 +7,16 @@
 # -------------
 
 - name: unsupported package manager
-  fail: msg='this playbook requries yum or apt only'
-  when: ansible_pkg_mgr != 'yum' and ansible_pkg_mgr != 'apt'
+  fail: msg='this playbook requries RedHat or Debian based system'
+  when: ansible_os_family|lower != 'redhat' and ansible_os_family|lower != 'debian'
 
-- include: '{{ ansible_os_family | lower }}.yml'
+- name: Include OS specific tasks
+  include: '{{ ansible_os_family | lower }}.yml'
 
-# ---------
-# firewalld
-# ---------
-- name: check if firewalld is installed
-  sudo: yes
-  command: which firewalld
-  register: firewalld
-  changed_when: false
-  ignore_errors: true
+- name: Include OS required variables
+  include_vars: '{{ ansible_os_family | lower }}.yml'
 
-- name: check if firewalld service is running
-  sudo: yes
-  command: firewall-cmd --state
-  register: firewalld_svc
-  ignore_errors: true
-  when: firewalld|success
-
-- name: enable cobbler tftpd through firewalld
-  sudo: yes
-  firewalld: service=tftp permanent=true state=enabled
-  notify: restart firewalld
-  when: firewalld|success and firewalld_svc.stdout=='running'
-
-- name: enable cobbler httpd through firewalld
-  sudo: yes
-  firewalld: service=http permanent=true state=enabled
-  notify: restart firewalld
-  when: firewalld|success and firewalld_svc.stdout=='running'
-
-# ---
-# ufw
-# ---
-- name: check if ufw is installed
-  sudo: yes
-  command: which ufw
-  register: ufw
-  changed_when: false
-  ignore_errors: true
-
-- name: allow tftp through ufw
-  sudo: yes
-  ufw: rule=allow port=69 proto=tcp
-  when: ufw|success
-
-- name: allow http through ufw
-  sudo: yes
-  ufw: rule=allow port=80 proto=tcp
-  when: ufw|success
+- include: firewall.yml
 
 # -------
 # Cobbler
@@ -72,50 +29,42 @@
   apt: name=cobbler={{ cobbler_version }} state=present
   when: ansible_pkg_mgr == 'apt'
 
-- stat: path=/etc/apache2
-  register: apache2_path
+- name: enable required apache modules
+  apache2_module: state=present name={{ item }}
+  with_items:
+    - proxy
+    - proxy_http
+    - status
+  when: apache_service_name == 'apache2'
 
 - name: copy cobbler config files
-  copy: src="cobbler.conf"
-        dest="/etc/apache2/conf-enabled/cobbler.conf"
+  copy: src=cobbler.conf
+        dest=/etc/apache2/conf-enabled/cobbler.conf
         mode=0644
-  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
+  when: apache_service_name == 'apache2'
 
 - name: copy cobbler_web config files
-  copy: src="cobbler_web.conf"
-        dest="/etc/apache2/conf-enabled/cobbler_web.conf"
+  copy: src=cobbler_web.conf
+        dest=/etc/apache2/conf-enabled/cobbler_web.conf
         mode=0644
   notify:
     - restart apache
-  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
-
-- name: enable module proxy
-  apache2_module: state=present name=proxy
-  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
-
-- name: enable module proxy_http
-  apache2_module: state=present name=proxy_http
-  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
-
-- name: start and enable apache2
-  service: name=apache2 state=reloaded enabled=true
-  when: apache2_path.stat.isdir is defined and apache2_path.stat.isdir
-
-- stat: path=/etc/httpd
-  register: httpd_path
-
-- name: start and enable httpd
-  service: name=httpd state=started enabled=true
-  when: httpd_path.stat.isdir is defined and httpd_path.stat.isdir
+  when: apache_service_name == 'apache2'
 
 - name: configure xinetd rsync
   copy: src=rsync
         dest=/etc/xinetd.d/
         owner=root group=root mode=0644
-  notify: restart xinetd
+  notify:
+    - restart xinetd
 
 - name: start and enable xinetd
-  service: name=xinetd state=started enabled=true
+  service: name={{ item }} state=started enabled=true
+  with_items:
+    - xinetd
+    - "{{ apache_service_name }}"
+
+- meta: flush_handlers
 
 - name: configure cobbler
   template: src=settings.j2 dest=/etc/cobbler/settings
@@ -125,7 +74,7 @@
     - sync cobbler
 
 - name: start and enable cobbler
-  service: name={{daemon}} state=started enabled=true
+  service: name={{ daemon }} state=started enabled=true
 
 - name: wait for cobbler
   wait_for: host=127.0.0.1 port=25151 delay=5 timeout=30 state=started
@@ -155,8 +104,23 @@
     - wait for cobbler
     - sync cobbler
 
+# ---------------------
+# Cobbler Kickstarts
+# ---------------------
+
 - name: adding defualt ubuntu preseed
   template: src=ubuntu-server.preseed.j2 dest=/etc/cobbler/ubuntu-server.preseed
+
+- name: copy user defined kickstart files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  with_items: "{{ kickstarts }}"
+  notify:
+    - restart cobbler
 
 # ---------------------
 # Cobbler Distributions
@@ -164,11 +128,11 @@
 
 # Attempt to un-mount any previous disto mount points, can occur if previous run failed
 - name: umount isos
+  ignore_errors: yes
   shell: umount {{ item.path | quote }}
   with_items:
     - "{{ distros }}"
   when: distros is defined
-  ignore_errors: yes
 
 - name: create iso directory to hold distro images
   file: path=~/iso state=directory
@@ -268,6 +232,8 @@
 # Cobbler Systems
 # ---------------
 
+- debug: var=systems
+
 - name: add systems to cobbler
   shell: >
     cobbler system add
@@ -282,11 +248,11 @@
     --interface={{ item.interface | quote }}
     {% if item.netboot is defined %}--netboot-enabled={{ item.netboot | quote }}{% endif %}
     {% if item.dns_name is defined %}--dns_name={{ item.dns_name | quote }}{% endif %}
-    {% if item.static is defined %}--static={{ item.static | quote }}{% endif %}
+    {% if item.static is defined %}--static={{ item.static }}{% endif %}
     {% if item.kopts is defined %}--kopts={{ item.kopts | quote }}{% endif %}
     {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
     {% if item.next_server is defined %}--server={{ item.next_server | quote }}{% endif %}
-    {% if item.mgmt-classes is defined %}--mgmt-classes={{ item.mgmt-classes }}{{% endif %}}
+    {% if item.mgmt_classes is defined %}--mgmt-classes={{ item.mgmt_classes }}{% endif %}
   when: systems is defined
   with_items:
     - "{{ systems }}"

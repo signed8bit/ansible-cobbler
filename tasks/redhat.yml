@@ -1,12 +1,4 @@
 ---
-
-# -------------
-# facts
-# -------------
-
-- set_fact:
-    daemon: cobblerd
-
 # ---------------
 # Package Sources
 # ---------------
