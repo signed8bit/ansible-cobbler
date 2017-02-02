@@ -219,6 +219,7 @@
     {% if item.kickstart is defined %}--kickstart={{ item.kickstart | quote }}{% endif %}
     {% if item.ksmeta is defined %}--ksmeta={{ item.ksmeta | quote }}{% endif %}
     {% if item.kopts is defined %}--kopts={{ item.kopts | quote }}{% endif %}
+    {% if item.kopts_post is defined %}--kopts-post={{ item.kopts_post | quote }}{% endif %}
     {% if item.repos is defined %}--repos={{ item.repos | quote }}{% endif %}
   when: profiles is defined
   with_items:
@@ -250,6 +251,8 @@
     {% if item.dns_name is defined %}--dns_name={{ item.dns_name | quote }}{% endif %}
     {% if item.static is defined %}--static={{ item.static }}{% endif %}
     {% if item.kopts is defined %}--kopts={{ item.kopts | quote }}{% endif %}
+    {% if item.kopts_post is defined %}--kopts-post={{ item.kopts_post | quote }}{% endif %}
+    {% if item.ksmeta is defined %}--ksmeta={{ item.ksmeta | quote }}{% endif %}
     {% if item.dhcptag is defined %}--dhcp-tag={{ item.dhcptag | quote }}{% endif %}
     {% if item.next_server is defined %}--server={{ item.next_server | quote }}{% endif %}
     {% if item.mgmt_classes is defined %}--mgmt-classes={{ item.mgmt_classes }}{% endif %}
