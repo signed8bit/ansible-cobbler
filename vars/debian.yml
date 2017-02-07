@@ -1,0 +1,4 @@
+---
+
+apache_service_name: apache2
+daemon: cobblerd

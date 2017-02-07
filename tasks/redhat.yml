@@ -1,0 +1,36 @@
+---
+# ---------------
+# Package Sources
+# ---------------
+
+# yum
+- name: configure epel repo (yum)
+  template: src=epel.repo.j2
+        dest=/etc/yum.repos.d/epel.repo
+        owner=root group=root mode=0644
+
+# ------------
+# Dependencies
+# ------------
+
+# yum
+- name: install dependencies (yum)
+  yum: name={{ item }} state=present
+  with_items:
+    - xinetd
+    - dhcp
+
+# -------
+# selinux
+# -------
+- name: set selinux to permissive (yum)
+  selinux: policy=targeted state=permissive
+
+# -----
+# dhcpd
+# -----
+- name: configure dhcpd (yum)
+  template: src=dhcpd.j2 dest=/etc/sysconfig/dhcpd
+
+- name: enable dhcpd (yum)
+  service: name=dhcpd state=stopped enabled=true

@@ -1,0 +1,50 @@
+---
+
+# ---------
+# firewalld
+# ---------
+- name: check if firewalld is installed
+  become: yes
+  command: which firewalld
+  register: firewalld
+  changed_when: false
+  ignore_errors: true
+
+- name: check if firewalld service is running
+  become: yes
+  command: firewall-cmd --state
+  register: firewalld_svc
+  ignore_errors: true
+  when: firewalld|success
+
+- name: enable cobbler tftpd through firewalld
+  become: yes
+  firewalld: service=tftp permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+- name: enable cobbler httpd through firewalld
+  become: yes
+  firewalld: service=http permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+# ---
+# ufw
+# ---
+- name: check if ufw is installed
+  become: yes
+  command: which ufw
+  register: ufw
+  changed_when: false
+  ignore_errors: true
+
+- name: allow tftp through ufw
+  become: yes
+  ufw: rule=allow port=69 proto=tcp
+  when: ufw|success
+
+- name: allow http through ufw
+  become: yes
+  ufw: rule=allow port=80 proto=tcp
+  when: ufw|success

@@ -418,7 +418,7 @@ virt_auto_boot: 1
 # cobbler's web directory.  Don't change this setting -- see the
 # Wiki on "relocating your cobbler install" if your /var partition
 # is not large enough.
-webdir: /var/www/cobbler
+webdir: /srv/www/cobbler
 
 # cobbler's public XMLRPC listens on this port.  Change this only
 # if absolutely needed, as you'll have to start supplying a new
@@ -456,11 +456,11 @@ replicate_rsync_options: "-avzH"
 replicate_repo_rsync_options: "-avzH"
 
 # always write DHCP entries, regardless if netboot is enabled
-always_write_dhcp_entries: 0
+always_write_dhcp_entries: 1
 
 # external proxy - used by: get-loaders, reposync, signature update
 # eg: proxy_url_ext: "http://192.168.1.1:8080"
-proxy_url_ext: ""
+proxy_url_ext: "{{ cobbler_proxy_url_ext  }}"
 
 # internal proxy - used by systems to reach cobbler for kickstarts
 # eg: proxy_url_int: "http://10.0.0.1:8080"
